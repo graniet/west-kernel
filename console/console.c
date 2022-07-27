@@ -1,7 +1,7 @@
 #include "console.h"
 #include "../drivers/display.h"
 
-const char *prompt = "[west-shell (v.1)] :-# ";
+//const char *prompt = "[west-shell (v.1)] :-# ";
 
 void banner() {
   kprint("__          __       _   _  __               \n");
@@ -13,7 +13,7 @@ void banner() {
 }
 
 void set_prompt() {
-  kprint(prompt);
+  kprint((char *) prompt);
 }
 
 void init_console() {

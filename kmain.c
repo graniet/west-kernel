@@ -8,6 +8,7 @@
 #include "console/console.h"
 
 void main() {
+  vga_disable_cursor();
   vga_clear();
   kprint("Loading kernel...\n");
   kprint("loading CPU exception, IRQ ...\n");

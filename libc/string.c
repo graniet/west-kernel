@@ -1,4 +1,4 @@
-
+#include "../drivers/display.h"
 /*
  * convert int to string
  */
@@ -28,6 +28,25 @@ void reverse(char *s) {
     s[i] = s[j];
     s[j] = c;
   }
+}
+
+
+    /*
+     * just compare string and return -1 if not equal.
+     */
+int strcmp(char *str1, char *str2) {
+  if (strlen(str1) != strlen(str2)) {
+    return -1;
+  }
+
+
+  for (int x = 0; str1[x] != 0; x++) {
+    if (str1[x] != str2[x]) {
+      return -1;
+    }
+  }
+
+  return 0;
 }
 
 /*

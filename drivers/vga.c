@@ -1,4 +1,5 @@
 #include "vga.h"
+#include "../cpu/io.h"
 
 int position_y = 0;
 int position_x = 0;
@@ -36,11 +37,31 @@ void vga_print(char *s) {
   }
 }
 
+
+void set_color(int c) {
+  color = c;
+}
+
 /*
- * function scroll when we have more then 25 line in VGA text mode
- * default size if 80 * 25
+ * Write from begin of current line
  */
-void scroll_down() {
+void vga_write_begin_line(char *s) {
+
+  for (int x = 0; x <= MAX_LINE_CHAR; x+=2) {
+    int current_pos = (position_y * MAX_LINE_CHAR) + x;
+    vga[current_pos] = ' ';
+    vga[current_pos + 1] = color;
+   }
+
+  position_x = 0;
+  vga_print(s);
+}
+
+    /*
+     * function scroll when we have more then 25 line in VGA text mode
+     * default size if 80 * 25
+     */
+    void scroll_down() {
   for (int x = 1; x < 25; x++) {
 
     int off = (x * MAX_LINE_CHAR) + 0xb8000;
@@ -66,7 +87,6 @@ void scroll_down() {
   position_y--;
 }
 
-
 /*
  * clear all text on screen
  */
@@ -79,4 +99,9 @@ void vga_clear() {
 
   position_x = 0;
   position_y = 0;
+}
+
+void vga_disable_cursor() {
+  out8(0x3D4, 0x0A);
+  out8(0x3D5, 0x20);
 }

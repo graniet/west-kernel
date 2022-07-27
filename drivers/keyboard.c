@@ -1,232 +1,66 @@
 #include "keyboard.h"
+#include "../console/menu.h"
 #include "../cpu/io.h"
 #include "display.h"
 #include "../cpu/isr.h"
 #include "../libc/string.h"
 #include "../libc/mem.h"
+#include "../console/console.h"
+char buffer[MAX_BUFFER];
+int pos = -1;
 
-char buffer[256];
-int pos = 0;
+const char keys[] = {
+    '?', '?', '1', '2', '3', '4', '5', '6', '7', '8', '9',  '0', '-', '=',  '?',
+    '?', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',  '[', ']', '?',  '?',
+    'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', '?', '\\', 'Z',
+    'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', '?', '?',  '?', ' '};
 
 void process_keyboard(registers_t regs) {
-  unsigned char key = in8(0x60);
-  print_scancode(key);
+
+  unsigned char scancode = in8(0x60);
+
+
+  if (scancode > 57) {
+    return;
+  }
+
+  if (pos >= MAX_BUFFER) {
+    kprint("command so long...\n");
+    memset(buffer, 256, '\0');
+    pos = -1;
+  }
+
+  if (scancode == K_ENTER) {
+    menu_exec(buffer); // execute menu interaction
+    memset(buffer, pos, '\0'); // reset a buffer with nullb value
+    pos = -1; // set buffer position to 0
+    return;
+
+  } else if (scancode == K_BACKSPACE) {
+    if (pos <= -1) {
+      pos = -1;
+      return;
+    }
+
+    buffer[pos] = '\0';
+    pos--;
+
+    vga_write_begin_line(prompt);
+    kprint(buffer);
+    return;
+  }
+
+
+  char c = keys[scancode]; // cast to int hex value.
+  if (c == '?') {
+    return;
+  }
+  char letter[2] = {c, '\0'};
+  pos++;
+  buffer[pos] = c;
+  kprint(letter);
 }
 
 void init_keyboard() {
   register_handler(33, process_keyboard);
-}
-
-void print_scancode(unsigned char scancode) {
-  if (pos >= 256) {
-    kprint(buffer);
-    kprint("\n");
-    memset(buffer, 256, '\0');
-    pos = 0;
-  }
-
-
-  switch (scancode) {
-        case 0x0:
-            kprint("ERROR");
-            break;
-        case 0x1:
-            kprint("ESC");
-            break;
-        case 0x2:
-          buffer[pos] = '1';
-          pos += 1;
-            kprint("1");
-            break;
-        case 0x3:
-          buffer[pos] = '2';
-          pos += 1;
-          kprint("2");
-          break;
-        case 0x4:
-          buffer[pos] = '3';
-          pos += 1;
-          kprint("3");
-          break;
-        case 0x5:
-            kprint("4");
-            break;
-        case 0x6:
-            kprint("5");
-            break;
-        case 0x7:
-            kprint("6");
-            break;
-        case 0x8:
-            kprint("7");
-            break;
-        case 0x9:
-            kprint("8");
-            break;
-        case 0x0A:
-            kprint("9");
-            break;
-        case 0x0B:
-            kprint("0");
-            break;
-        case 0x0C:
-            kprint("-");
-            break;
-        case 0x0D:
-            kprint("+");
-            break;
-        case 0x0E:
-          buffer[pos] = 0;
-          pos--;
-          //kprint("Backspace");
-            break;
-        case 0x0F:
-            kprint("Tab");
-            break;
-        case 0x10:
-            kprint("Q");
-            break;
-        case 0x11:
-            kprint("W");
-            break;
-        case 0x12:
-            kprint("E");
-            break;
-        case 0x13:
-            kprint("R");
-            break;
-        case 0x14:
-            kprint("T");
-            break;
-        case 0x15:
-            kprint("Y");
-            break;
-        case 0x16:
-            kprint("U");
-            break;
-        case 0x17:
-            kprint("I");
-            break;
-        case 0x18:
-            kprint("O");
-            break;
-        case 0x19:
-            kprint("P");
-            break;
-		case 0x1A:
-			kprint("[");
-			break;
-		case 0x1B:
-			kprint("]");
-			break;
-		case 0x1C:
-			//kprint("ENTER");
-      kprint("buffer: ");
-      kprint(buffer);
-      memset(buffer, pos, '\0');
-      pos = 0;
-      kprint("\n");
-			break;
-		case 0x1D:
-			kprint("LCtrl");
-			break;
-		case 0x1E:
-			kprint("A");
-			break;
-		case 0x1F:
-			kprint("S");
-			break;
-        case 0x20:
-            kprint("D");
-            break;
-        case 0x21:
-            kprint("F");
-            break;
-        case 0x22:
-            kprint("G");
-            break;
-        case 0x23:
-            kprint("H");
-            break;
-        case 0x24:
-            kprint("J");
-            break;
-        case 0x25:
-            kprint("K");
-            break;
-        case 0x26:
-            kprint("L");
-            break;
-        case 0x27:
-            kprint(";");
-            break;
-        case 0x28:
-            kprint("'");
-            break;
-        case 0x29:
-            kprint("`");
-            break;
-		case 0x2A:
-			kprint("LShift");
-			break;
-		case 0x2B:
-			kprint("\\");
-			break;
-		case 0x2C:
-			kprint("Z");
-			break;
-		case 0x2D:
-			kprint("X");
-			break;
-		case 0x2E:
-			kprint("C");
-			break;
-		case 0x2F:
-			kprint("V");
-			break;
-        case 0x30:
-            kprint("B");
-            break;
-        case 0x31:
-            kprint("N");
-            break;
-        case 0x32:
-            kprint("M");
-            break;
-        case 0x33:
-            kprint(",");
-            break;
-        case 0x34:
-            kprint(".");
-            break;
-        case 0x35:
-            kprint("/");
-            break;
-        case 0x36:
-            kprint("Rshift");
-            break;
-        case 0x37:
-            kprint("Keypad *");
-            break;
-        case 0x38:
-            kprint("LAlt");
-            break;
-        case 0x39:
-          buffer[pos] = ' ';
-          pos++;
-          kprint(" ");
-          //kprint("Spc");
-            break;
-        default:
-            /* 'keuyp' event corresponds to the 'keydown' + 0x80 
-             * it may still be a scancode we haven't implemented yet, or
-             * maybe a control/escape sequence */
-            if (scancode <= 0x7f) {
-              //kprint("Unknown key down");
-            } else if (scancode <= 0x39 + 0x80) {
-              //kprint("up ");
-              //print_scancode(scancode - 0x80);
-            } else kprint("Unknown key up");
-            break;
-    }
 }
