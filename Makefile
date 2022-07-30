@@ -18,7 +18,9 @@ build: clean
 		$(GCC) -ffreestanding -o menu.o -c console/menu.c
 		$(GCC) -ffreestanding -o console.o -c console/console.c
 		$(GCC) -ffreestanding -o mem.o -c libc/mem.c
-		$(LD) -o kernel.bin -Ttext 0x1000 --oformat binary kernel-entry.o kernel.o screen.o driver.o vga.o idt.o isr.o kernel-isr.o io.o pic.o string.o keyboard.o console.o mem.o menu.o
+		$(GCC) -ffreestanding -o heap.o -c sys/heap.c
+		$(GCC) -ffreestanding -o kheap.o -c sys/kheap.c
+		$(LD) -o kernel.bin -Ttext 0x1000 --oformat binary kernel-entry.o kernel.o screen.o driver.o vga.o idt.o isr.o kernel-isr.o io.o pic.o string.o keyboard.o console.o mem.o menu.o heap.o kheap.o
 		cat boot.bin kernel.bin > os
 
 clean:

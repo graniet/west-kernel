@@ -1,1 +1,1 @@
-void memset(char *ptr, int c, char v);
+void * memset(char *ptr, int c, int v);
