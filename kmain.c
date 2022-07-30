@@ -27,8 +27,10 @@ void main() {
 
   kprint("init a kernel heap...\n");
   init_heap();
-  kmalloc(10);
-  kmalloc(20);
+  void * m = kmalloc(10);
+  void * a = kmalloc(20);
+  kfree(a);
+  kfree(m);
   kprint("starting a first shell...\n");
   //init_console();
 

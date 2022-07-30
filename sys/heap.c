@@ -46,13 +46,6 @@ void init_heap() {
 
 void  * _kmalloc(int size) {
   int block_pos = search_available_block(&heap, size);
-  char pos[3];
-  itoa(block_pos, pos);
-
-  kprint("block_pos = ");
-  kprint(pos);
-  kprint("\n");
-
   if (set_block_taken(&heap, block_pos) == -1) {
     kprint("error in set block to taken...\n");
     return;
@@ -60,6 +53,26 @@ void  * _kmalloc(int size) {
 
   void * block_address = heap.start_address + (block_pos * HEAP_KERNEL_BLOCK_SIZE);
   return block_address;
+}
+
+int _kfree(void * ptr) {
+  int block_pos = ((int) ptr - (int)heap.start_address) / HEAP_KERNEL_BLOCK_SIZE;
+  if (set_block_free(&heap, block_pos) == -1) {
+    kprint("error in free.\n");
+    return -1;
+  }
+
+  return 0;
+}
+
+
+int set_block_free(sys_heap_t * p_heap, int block_pos) {
+  p_heap->index->entries[block_pos] &= HEAP_KERNEL_ENTRY_FREE;
+
+  if((p_heap->index->entries[block_pos] & (1 << 7)) != 0) {
+    return -1;
+  }
+  return 0;
 }
 
 int set_block_taken(sys_heap_t * p_heap, int block_pos) {
