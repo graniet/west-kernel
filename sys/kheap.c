@@ -1,7 +1,7 @@
 #include "heap.h"
 
 void * kmalloc(int size) {
-  test_malloc(size);
+  _kmalloc(size);
 }
 
 void kfree(void * ptr) {}

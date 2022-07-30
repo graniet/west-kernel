@@ -29,5 +29,6 @@ typedef struct sys_heap {
 
 void init_heap();
 
+int set_block_taken(sys_heap_t *, int);
 int search_available_block(sys_heap_t *, int);
-void test_malloc(int);
+void * _kmalloc(int);
