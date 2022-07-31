@@ -57,6 +57,8 @@ void  * _kmalloc(int size) {
 
 int _kfree(void * ptr) {
   int block_pos = ((int) ptr - (int)heap.start_address) / HEAP_KERNEL_BLOCK_SIZE;
+  int size_to_free = sizeof(HEAP_KERNEL_ENTRY) * (block_pos * HEAP_KERNEL_BLOCK_SIZE);
+  memset(ptr, size_to_free, 0);
   if (set_block_free(&heap, block_pos) == -1) {
     kprint("error in free.\n");
     return -1;
