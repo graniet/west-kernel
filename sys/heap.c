@@ -43,18 +43,28 @@ void init_heap() {
   }
 }
 
-
+/*
+ * real kmalloc function
+ * use a size for getting a block pos (only one for now, one=4096bytes)
+ * also we set a block as taken with a first high bit to one
+ */
 void  * _kmalloc(int size) {
   int block_pos = search_available_block(&heap, size);
   if (set_block_taken(&heap, block_pos) == -1) {
     kprint("error in set block to taken...\n");
     return;
   }
-
   void * block_address = heap.start_address + (block_pos * HEAP_KERNEL_BLOCK_SIZE);
   return block_address;
 }
 
+/*
+ * real kfree function
+ * this function use a ptr in argument
+ * this ptr is a memory pointer in heap, we get a block position with ptr - start / 4096
+ * we memset to 0 a block size
+ * and final we mark a block to free in index
+ */
 int _kfree(void * ptr) {
   int block_pos = ((int) ptr - (int)heap.start_address) / HEAP_KERNEL_BLOCK_SIZE;
   int size_to_free = sizeof(HEAP_KERNEL_ENTRY) * (block_pos * HEAP_KERNEL_BLOCK_SIZE);
@@ -67,7 +77,10 @@ int _kfree(void * ptr) {
   return 0;
 }
 
-
+/*
+ * set a high bit of index to zero, this equal to block free
+ * also we check is a 8th bit is really with 0 value
+ */
 int set_block_free(sys_heap_t * p_heap, int block_pos) {
   p_heap->index->entries[block_pos] &= HEAP_KERNEL_ENTRY_FREE;
 
@@ -77,6 +90,10 @@ int set_block_free(sys_heap_t * p_heap, int block_pos) {
   return 0;
 }
 
+/*
+ * set a high bit of index to one, this equal to block taken
+ * also we check if a 8th bit (start at 0) is really set to 1
+ */
 int set_block_taken(sys_heap_t * p_heap, int block_pos) {
   p_heap->index->entries[block_pos] |= HEAP_KERNEL_ENTRY_TAKEN;
 
@@ -86,6 +103,9 @@ int set_block_taken(sys_heap_t * p_heap, int block_pos) {
   return 0;
 }
 
+/*
+ * here we searching a first available block available in heap index
+ */
 int search_available_block(sys_heap_t * p_heap, int size) {
   char entries_size[3];
   itoa(p_heap->index->entries_size, entries_size);
